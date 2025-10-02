@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TastyBook — Random Recipe Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fff8f0;
+  --card: #fff;
+  --accent: #ff7b54;
+  --accent2: #ffb26b;
+  --text: #2d2d2d;
+}
+* { box-sizing: border-box; margin:0; padding:0; }
+body { font-family:'Inter',sans-serif; background: var(--bg); display:flex; align-items:center; justify-content:center; height:100vh; padding:1rem; }
+.container { background:var(--card); padding:2rem; border-radius:20px; max-width:700px; width:100%; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,0.1); overflow-y:auto; max-height:95vh; }
+h1 { font-size:2rem; margin-bottom:1rem; color:var(--accent); }
+#recipe { margin:1.5rem 0; font-size:1.2rem; font-weight:600; color:var(--text); }
+#ingredients, #instructions { margin:1rem 0; font-size:1rem; line-height:1.5; color:#444; text-align:left; }
+button { background:var(--accent); border:none; color:#fff; padding:0.8rem 1.5rem; font-weight:600; border-radius:10px; cursor:pointer; font-size:1rem; transition:0.3s; }
+button:hover { background:var(--accent2); transform:translateY(-3px); box-shadow:0 4px 10px rgba(0,0,0,0.15); }
+footer { margin-top:1.5rem; font-size:0.85rem; color:#555; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🍴 TastyBook</h1>
+  <div id="recipe">Click below to discover your next meal idea!</div>
+  <div id="ingredients"></div>
+  <div id="instructions"></div>
+  <button id="generate">New Recipe</button>
+  <footer>&copy; 2025 TastyBook</footer>
+</div>
+
+<script>
+const recipes = [
+  { name:"🍝 Spaghetti Carbonara", ingredients:["200g spaghetti","100g pancetta","2 eggs","50g Parmesan","Black pepper"], instructions:"Cook pasta. Fry pancetta. Mix eggs & cheese. Combine off-heat with pasta." },
+  { name:"🥗 Greek Salad", ingredients:["Tomatoes","Cucumber","Olives","Feta cheese","Olive oil"], instructions:"Chop vegetables. Toss with feta and olives. Drizzle with olive oil." },
+  { name:"🍛 Chicken Curry", ingredients:["Chicken breast","Onion","Garlic","Curry powder","Coconut milk"], instructions:"Fry onion & garlic. Add chicken and curry powder. Pour coconut milk and simmer." },
+  { name:"🥪 Club Sandwich", ingredients:["Bread","Chicken","Bacon","Lettuce","Mayonnaise"], instructions:"Toast bread. Layer chicken, bacon, lettuce, and mayo. Cut diagonally." },
+  { name:"🍜 Ramen Bowl", ingredients:["Ramen noodles","Miso paste","Broth","Soft-boiled egg","Nori"], instructions:"Cook noodles. Mix broth with miso. Add toppings." },
+  { name:"🌮 Beef Tacos", ingredients:["Taco shells","Ground beef","Cheddar","Lettuce","Salsa"], instructions:"Cook beef with spices. Fill shells with toppings." },
+  { name:"🍕 Margherita Pizza", ingredients:["Pizza dough","Tomato sauce","Mozzarella","Basil"], instructions:"Spread sauce, add mozzarella and basil. Bake until crisp." },
+  { name:"🥘 Paella", ingredients:["Rice","Saffron","Chicken","Shrimp","Peas"], instructions:"Cook rice with saffron. Add meats, seafood, and vegetables." },
+  { name:"🍲 Tomato Soup", ingredients:["Tomatoes","Onion","Garlic","Cream","Stock"], instructions:"Simmer tomatoes with onion & garlic. Blend and add cream." },
+  { name:"🥩 Steak & Fries", ingredients:["Steak","Potatoes","Salt","Pepper"], instructions:"Grill steak. Fry potatoes. Serve with sauce." },
+  { name:"🍤 Garlic Butter Shrimp", ingredients:["Shrimp","Butter","Garlic","Parsley"], instructions:"Sauté garlic in butter. Add shrimp until pink. Garnish." },
+  { name:"🥟 Dumplings", ingredients:["Dumpling wrappers","Pork","Cabbage","Soy sauce"], instructions:"Mix filling. Wrap. Steam or pan-fry." },
+  { name:"🍰 Cheesecake", ingredients:["Cream cheese","Sugar","Eggs","Biscuit base"], instructions:"Mix filling. Pour over crust. Bake and chill." },
+  { name:"🥖 Baguette Sandwich", ingredients:["Baguette","Ham","Cheese","Lettuce","Mustard"], instructions:"Slice baguette. Fill with ham, cheese, lettuce, mustard." },
+  { name:"🍇 Fruit Bowl", ingredients:["Mixed fruits","Honey"], instructions:"Chop fruits. Drizzle honey. Serve chilled." },
+  { name:"🍳 Omelette", ingredients:["Eggs","Butter","Salt","Pepper","Cheese"], instructions:"Beat eggs. Pour into pan. Add cheese and fold." },
+  { name:"🥒 Sushi Rolls", ingredients:["Nori","Rice","Cucumber","Salmon"], instructions:"Spread rice on nori. Add filling. Roll tightly." },
+  { name:"🥔 Mashed Potatoes", ingredients:["Potatoes","Butter","Milk","Salt"], instructions:"Boil potatoes. Mash with butter and milk." },
+  { name:"🍛 Lentil Dal", ingredients:["Lentils","Onion","Garlic","Curry spices"], instructions:"Boil lentils. Fry onion & spices. Mix together." },
+  { name:"🍪 Chocolate Chip Cookies", ingredients:["Flour","Sugar","Butter","Eggs","Chocolate chips"], instructions:"Mix ingredients. Bake until golden." },
+  { name:"🥒 Caesar Salad", ingredients:["Romaine","Croutons","Parmesan","Caesar dressing"], instructions:"Toss lettuce with croutons, cheese, dressing." },
+  { name:"🍋 Lemon Tart", ingredients:["Flour","Butter","Sugar","Lemon juice","Eggs"], instructions:"Bake crust. Fill with lemon custard. Chill." },
+  { name:"🥫 Chili Con Carne", ingredients:["Ground beef","Beans","Tomatoes","Chili powder"], instructions:"Cook beef. Add beans, spices, simmer." },
+  { name:"🥠 Pancakes", ingredients:["Flour","Eggs","Milk","Sugar"], instructions:"Mix batter. Fry in pan until golden." },
+  { name:"🥕 Carrot Soup", ingredients:["Carrots","Onion","Garlic","Stock","Cream"], instructions:"Simmer carrots with stock. Blend smooth." },
+  { name:"🥒 Pickles", ingredients:["Cucumbers","Vinegar","Salt","Sugar"], instructions:"Soak cucumbers in brine. Store until tangy." },
+  { name:"🍫 Brownies", ingredients:["Chocolate","Butter","Flour","Sugar","Eggs"], instructions:"Melt chocolate & butter. Mix batter. Bake." },
+  { name:"🍌 Banana Bread", ingredients:["Bananas","Flour","Sugar","Eggs","Butter"], instructions:"Mash bananas. Mix batter. Bake until golden." },
+  { name:"🥩 Meatballs", ingredients:["Ground beef","Breadcrumbs","Egg","Garlic"], instructions:"Mix and shape balls. Fry or bake in sauce." },
+  { name:"🥟 Gyoza", ingredients:["Wrappers","Ground pork","Cabbage","Soy sauce"], instructions:"Fill wrappers. Pan-fry then steam." },
+  { name:"🍛 Butter Chicken", ingredients:["Chicken","Butter","Tomato puree","Cream","Spices"], instructions:"Cook chicken. Simmer sauce with spices & cream." },
+  { name:"🥯 Bagel & Cream Cheese", ingredients:["Bagel","Cream cheese"], instructions:"Toast bagel. Spread cream cheese." },
+  { name:"🍤 Pad Thai", ingredients:["Rice noodles","Shrimp","Eggs","Peanuts","Tamarind"], instructions:"Stir-fry noodles with sauce and toppings." },
+  { name:"🥬 Stir Fry Veggies", ingredients:["Mixed veggies","Soy sauce","Garlic","Ginger"], instructions:"Stir fry veggies with sauce in hot wok." },
+  { name:"🍠 Sweet Potato Fries", ingredients:["Sweet potatoes","Salt","Oil"], instructions:"Slice potatoes. Bake or fry until crispy." },
+  { name:"🍤 Fish & Chips", ingredients:["White fish","Batter","Potatoes"], instructions:"Coat fish. Fry with potatoes." },
+  { name:"🥧 Apple Pie", ingredients:["Apples","Sugar","Cinnamon","Pastry dough"], instructions:"Fill crust with apples. Bake until golden." },
+  { name:"🥒 Guacamole", ingredients:["Avocado","Lime","Onion","Tomato","Salt"], instructions:"Mash avocado. Mix in rest." },
+  { name:"🥩 Beef Stroganoff", ingredients:["Beef strips","Mushrooms","Onion","Sour cream"], instructions:"Cook beef & mushrooms. Add cream sauce." },
+  { name:"🥗 Caprese Salad", ingredients:["Tomatoes","Mozzarella","Basil","Olive oil"], instructions:"Layer tomato, cheese, basil. Drizzle oil." },
+  { name:"🍛 Biryani", ingredients:["Rice","Chicken","Spices","Yogurt","Onion"], instructions:"Cook rice and meat with spices. Layer together." },
+  { name:"🍲 Pho", ingredients:["Rice noodles","Beef broth","Beef slices","Herbs"], instructions:"Simmer broth. Add noodles and beef. Garnish." },
+  { name:"🥓 BLT Sandwich", ingredients:["Bread","Bacon","Lettuce","Tomato"], instructions:"Toast bread. Add bacon, lettuce, tomato." },
+  { name:"🍲 Clam Chowder", ingredients:["Clams","Potatoes","Onion","Cream"], instructions:"Cook potatoes in broth. Add clams & cream." },
+  { name:"🥩 Roast Beef", ingredients:["Beef roast","Salt","Pepper","Herbs"], instructions:"Season beef. Roast in oven until tender." },
+  { name:"🥟 Pierogi", ingredients:["Dough","Potatoes","Onion","Cheese"], instructions:"Fill dough. Boil and pan-fry lightly." },
+  { name:"🥚 Shakshuka", ingredients:["Eggs","Tomatoes","Onion","Spices"], instructions:"Simmer tomatoes with spices. Poach eggs inside." },
+  { name:"🍜 Pho Veggie", ingredients:["Veggie broth","Rice noodles","Tofu","Herbs"], instructions:"Simmer broth. Add noodles, tofu, garnish." },
+  { name:"🥪 Grilled Cheese", ingredients:["Bread","Cheddar cheese","Butter"], instructions:"Butter bread. Grill with cheese inside." }
+];
+
+const recipeEl = document.getElementById('recipe');
+const ingredientsEl = document.getElementById('ingredients');
+const instructionsEl = document.getElementById('instructions');
+
+document.getElementById('generate').addEventListener('click', () => {
+  const randomIndex = Math.floor(Math.random() * recipes.length);
+  const recipe = recipes[randomIndex];
+  recipeEl.textContent = recipe.name;
+  ingredientsEl.innerHTML = "<strong>Ingredients:</strong><ul>" + recipe.ingredients.map(i => `<li>${i}</li>`).join('') + "</ul>";
+  instructionsEl.innerHTML = "<strong>Instructions:</strong> " + recipe.instructions;
+});
+</script>
+</body>
+</html>
